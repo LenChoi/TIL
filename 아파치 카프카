@@ -145,3 +145,131 @@ metadata.max.age.ms: 메타데이터를 강제로 리프래시 하는 간격(기
 metadata.max.idle.ms: 프로듀서가 유휴 상태일 경우 메타데이터를 캐시에 유지하는 기간
 
 leader_not_available 에러가 발생하면 메타데이터 문제라 자주 리프래시 할 수 있게 한다.
+
+
+
+
+토픽을 생성 할 수 있다.
+Bin/kafka-topics.sh —create —bootstrap-server my-kafka:9092 —topic hollo.kafka
+
+토픽 정보 확인 가능
+Bin/kafka-topics.sh —bootstrap-server my-kafka:9092 —topic hello.kafka —describe
+
+
+파티션 개수 늘리기
+Bin/kafka-topics.sh —bootstrap-server my-kafkaL9092 —topic test —alter —partitions 4
+
+파티션 줄이는 것은 엄청 복잡해 아직은 지원하지 않는다.
+
+카프카 토픽에 데이터를 넣기
+bin/kafka-console-producer.sh --bootstrap-server my-kafka:9092 --topic hello.kafka
+
+Parse key 옵션을 주지 않으면 메시지 키는 null로 설정되고 파티션에 라운드 로빈으로 들어가게 된다.
+
+bin/kafka-console-producer.sh --bootstrap-server my-kafka:9092 --topic hello.kafka —property “parse.key=true” —property “key.separator=:”
+
+
+
+
+Kafka-console-consumer.sh
+특정 토픽에 있는 데이터를 컨슘해서 임시적으로 조회 하기 위한 용도
+
+—from-beginning 옵션을 주면 토픽에 저장된 가장 가장 오래된 데이터부터 출력
+
+키 출력
+—property print.key=true 
+
+키와 벨류 사이에 구분자
+—property key.separator=“-“
+
+—max-messages 옵션을 사용하면 최대 컨슘 메시지 개수를 설정
+ 
+—partition 옵션을 사용하면 특정 파티션만 컴슘할 수 있다.
+
+
+특정 파티션만 컨슘 가능
+—partition
+
+bin/kafka-console-consumer.sh --bootstrap-server my-kafka:9092 --topic hello.kafka --property print.key=true --property key.separtator="-" --from-beginning --max-messages 3 --partition 0
+
+
+
+Kafka-consumer-groups.sh
+
+오프셋 리셋 종류
+—to-earliest: 가장 처음 오프셋으로 리셋
+—to-latest: 가장 마지막 오프셋으로 리셋
+—to-current: 현 시점 기준 오프셋으로 리셋
+—to-datetime: 특정 일시로 오프셋 리셋
+—to-offset: 특정 오프셋으로 리셋
+—shift-by: 현재 컨슈머 오프셋에서 앞으로 옮겨서 리셋
+
+bin/kafka-consumer-groups.sh --bootstrap-server my-kafka:9092 --group hello-group --describe
+
+가장 처음의 오프셋부터 읽게 초기화
+bin/kafka-consumer-groups.sh --bootstrap-server my-kafka:9092 --group hello-group --topic hello.kafka --reset-offsets --to-earliest --execute
+
+
+
+Kafka-producer-perf-test.sh
+카프카 프로듀서로 퍼포먼스를 측정할 떄 사용. 카프카 브로커와 컨슈머 간의 네트워크를 체크할 때 사용 할 수 있다.
+
+Kafka-reassign-partitions.sh
+리더 파티션이 한 곳으로 몰릴 경우 재할당
+
+
+Kafka-delete-record.sh
+특정 파티션의 오프셋 번호 이하만큼을 다 지운다.
+
+Kafka-dump-log.sh
+인덱스, 로그, 타임인덱스 등 세그먼트 단위로 들어 있다.
+
+카프카 브로커와 로컬 커맨드 라인 툴 버전이 맞아야 한다.
+
+
+
+
+
+프로듀서
+카프카에서 데이터의 시작점은 프로듀서이다.
+자바만 공식 라이브러리로 사용된다. 다른언어는 성능이나 기능이 다를 수 있음.
+
+프로듀서 내부 구조
+- 프로듀서레코드: 프로드서에서 생성하는 레코드. 오프셋은 미포함
+- send(): 레코드를 전송 요청 메서드
+- Petitioner: 어느 파티션으로 전송할지 지정하는 파티셔너
+- Accumulator: 배치로 묶어 전송할 데이터를 모으는 버퍼
+- 
+
+프로듀서의 기본 파티셔너
+1. RoundRobinPartitioner
+2. UniformStickyPartitioner: 어큐뮤레이터에서 레코드들이 배치로 묶을 떄까지 기다렸다가 전송, 배치로 묶일 뿐 결국 파티션 순회
+3. 커스텀 파티셔너
+
+카프카 클라이언트 라이브러리에 서는 사용자 지정 파티셔너를 생성하기 위한 Partitioner를 제공한다.
+인터페이스를 상속 후 파티션 지정 로직을 적용 할 수 있다.
+
+프로듀서 주요 옵션(필수 옵션)
+Bootstrap.server: 프로듀서가 데이터를 전송할 대상 카프카 클러스터에 속한 브로커의 호스트 이름: 포트를 1개 이상 작성한다. 2개 이상 입력해 일부 브로커에 이슈가 발생하더라도 접속하는데 이슈가 없도록 설정
+
+- Key.serializer: 레코드의 메시지 키를 직렬화 하는 클래스를 지정
+- Value.serializer: 레코드의 메시지 값을 직렬화하는 클래스를 지정
+
+
+
+acks옵션은 0, 1, all(-1) 값을 가질 수 있다.
+복제 개수가 1인 경우 ACKS옵션에 따른 성능 변화는 크지 않다. 복제 개수가 2 이상인 경우 ACKS별 동작 방식에 대해 알아보자
+
+acks=0
+프로듀서가 리더 파티션으로 데이터를 전송했을 때 리더파이션으로 데이터가 저장되었는지 확인하지 않는다.
+SEND()메서드만 실행, 가장 속도가 빠르다. 신뢰도가 낮음
+
+acks=1
+프로듀서가 보낸 데이터가 리더 파티션에만 정상적으로 적재되었는지 확인
+만약 적재되지 않았다면 리더 파티션에 적재될 때까지 재시도할 수 있다.
+정말 큰 이슈가 아닌 이상 렉이 딱히 발생하지 않았다. 이걸로도 충분함
+
+
+acks=-1
+프로듀서가 리더와 팔로워 둘다 정상적으로 적재되었는지 확인. 속도가 느리다(신뢰도가 높다)
+
