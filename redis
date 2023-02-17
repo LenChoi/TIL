@@ -1,0 +1,112 @@
+
+레디스는 get 에는 패턴이 적용 되지만 del에는 정확한 문자를 입력해야 한다.
+
+flushdb하면 전체 다 날라감
+
+set a b ex 10 10초 후 이 키를 자동으로 날린다
+ttl key 하면 남은 시간 확인 가능
+expire a 초 하면 만료 시간 증가됨
+
+set a b exat 유닉스타임
+
+set b c px 밀리세컨즈
+
+벨류 값을 바꾸면 만료 시간이 없어진다.
+
+ttl 결과가 -1이면 만료 시간 셋팅 안되어 있고
+-2는 만료되었다.
+
+만약 벨류를 바꿔도 만료 시간을 유지하고 싶으면
+set a b keepttl
+
+exist key
+존재하면 1 없으면 0
+
+incr key  -> 1씩 증가한다
+
+키가 없는데 incr key를 하면
+새로운 키를 만들어주고 값을 1증가시킨다
+
+decr key 
+
+
+Incr prod:a:visit	호출하면 바로 방문횟수 1로 셋팅해준다.
+
+원하는 만큼 증감 하고 싶으면 incrby key value
+실수는 incrbyfloat
+Decrby도 있음
+
+
+Hash
+
+hset user:1 name sam age 10 city atlanta [
+
+hset 이름 키 벨류 키 벨류 …
+
+get 이름 사용 불가능
+
+조회시 hget 이름 필드 이런식으로 입력
+
+전체 조회는 hgetall name
+
+expire 해시이름 초 하면 만료 시간 설정 가능 
+
+해쉬의 키 하나만 삭제하고 싶으면 heel name key
+
+전체 삭제는 del name
+
+rpush 오른쪽에 푸쉬
+lpush 왼쪽에 푸쉬
+
+리스트의 길이를 알고 싶으면 llen name
+조회는 orange name start end
+end를 -1로 하면 전체 조회 가능
+
+lpop name 왼쪽 값 팝 
+rpop name 오른쪽 값 팝 
+
+lpop name key number 하면 number만큼 팝 된다.
+
+
+rpush lpop -> 큐
+rpush rpop -> 스택
+
+
+유니크 값 담는 Set
+sadd name value value…
+
+scare users - 카디널리티
+
+members name - 전체 조회
+
+Sismemver name value
+존재하면 1 없으면 0
+
+seem name value 삭제
+
+spop name
+
+
+
+Sorted Set
+프리올리티 큐
+
+zadd key score member score member…
+
+zincrby products 1 books
+
+zrange key start end
+
+zpopmax key
+
+
+
+Single Threaded
+레디스는 트랜잭션의 개념이 있다.
+
+
+multi 입력하면 트랜잭션 모드가 된다.
+exec 입력시 종료
+
+Watch key key…
+만약 트랜잭션 중에 다른 작업이 들어오면 트랜잭션이 실행되지 않는다.
