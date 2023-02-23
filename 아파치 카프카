@@ -170,7 +170,6 @@ bin/kafka-console-producer.sh --bootstrap-server my-kafka:9092 --topic hello.kaf
 
 
 
-
 Kafka-console-consumer.sh
 특정 토픽에 있는 데이터를 컨슘해서 임시적으로 조회 하기 위한 용도
 
