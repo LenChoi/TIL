@@ -11,12 +11,13 @@ import reactor.core.publisher.Mono
 @Service
 class ProductCacheTemplate(
     private val productRepository: ProductRepository,
-    private var map: RMapReactive<Long, Product>,
     client: RedissonReactiveClient
 ) : CacheTemplate<Long, Product>() {
 
+    lateinit var map: RMapReactive<Long, Product>
+
     init {
-        map = client.getMap("product", TypedJsonJacksonCodec(Int::class.java, Product::class.java))
+        map = client.getMap("product", TypedJsonJacksonCodec(Long::class.java, Product::class.java))
     }
 
     override fun getFromSource(id: Long): Mono<Product> {
@@ -24,7 +25,7 @@ class ProductCacheTemplate(
     }
 
     override fun getFromCache(id: Long): Mono<Product> {
-        return map.get(id)
+        return map[id]
     }
 
     override fun updateSource(id: Long, product: Product): Mono<Product> {
