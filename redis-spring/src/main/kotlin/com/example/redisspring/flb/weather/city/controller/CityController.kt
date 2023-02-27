@@ -13,8 +13,8 @@ import reactor.core.publisher.Mono
 class CityController(
     private val cityService: CityService
 ) {
-    @GetMapping("/{zipcode}")
-    fun getCity(@PathVariable zipcode: String): Mono<City> {
-        return cityService.getCity(zipcode)
-    }
+//    @GetMapping("/{zipcode}")
+//    fun getCity(@PathVariable zipcode: String): Mono<City> {
+//        return cityService.getCity(zipcode)
+//    }
 }

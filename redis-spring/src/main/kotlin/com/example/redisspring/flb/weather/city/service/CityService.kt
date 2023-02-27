@@ -16,7 +16,7 @@ import java.util.stream.Collectors
 @Service
 class CityService(
     private val client: RedissonReactiveClient,
-    private val cityClient: CityClient
+//    private val cityClient: CityClient
 ) {
 //    val cityMap: RMapCacheReactive<String, City> =
 //        client.getMapCache("city", TypedJsonJacksonCodec(String::class.java, City::class.java))
@@ -30,16 +30,16 @@ class CityService(
 //                cityClient.getCity(zipCode)
 //                    .flatMap { c -> this.cityMap.fastPut(zipCode, c, 10, TimeUnit.SECONDS).thenReturn(c) }) // 10 초 후 자동 삭제
 //    }
-
-    fun getCity(zipCode: String): Mono<City> {
-        return this.cityMap.get(zipCode).onErrorResume { this.cityClient.getCity(zipCode) }
-    }
-
-    @Scheduled(fixedRate = 10_000)
-    fun updateCity() {
-        cityClient.getAll()
-            .collectList()
-            .map { list -> list.stream().collect(Collectors.toMap(City::zip, Function.identity())) }
-            .flatMap(cityMap::putAll).subscribe()
-    }
+//
+//    fun getCity(zipCode: String): Mono<City> {
+//        return this.cityMap.get(zipCode).onErrorResume { this.cityClient.getCity(zipCode) }
+//    }
+//
+//    @Scheduled(fixedRate = 10_000)
+//    fun updateCity() {
+//        cityClient.getAll()
+//            .collectList()
+//            .map { list -> list.stream().collect(Collectors.toMap(City::zip, Function.identity())) }
+//            .flatMap(cityMap::putAll).subscribe()
+//    }
 }
