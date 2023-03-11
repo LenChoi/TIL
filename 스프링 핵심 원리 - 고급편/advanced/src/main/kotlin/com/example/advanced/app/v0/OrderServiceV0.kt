@@ -1,4 +1,4 @@
-package com.example.advanced.v0
+package com.example.advanced.app.v0
 
 import org.springframework.stereotype.Service
 

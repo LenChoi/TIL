@@ -1,4 +1,4 @@
-package com.example.advanced.hellotrace
+package com.example.advanced.trace.hellotrace
 
 import com.example.advanced.trace.TraceId
 import com.example.advanced.trace.TraceStatus
@@ -8,12 +8,19 @@ import org.springframework.stereotype.Component
 private val logger = KotlinLogging.logger {}
 
 @Component
-class HelloTraceV1 {
+class HelloTraceV2 {
     fun begin(message: String): TraceStatus {
         val traceId = TraceId()
         val startTimeMs = System.currentTimeMillis()
         logger.info("[{}] {}{}", traceId.id, addSpace(START_PREFIX, traceId.level), message)
-        return TraceStatus(traceId, startTimeMs, message!!)
+        return TraceStatus(traceId, startTimeMs, message)
+    }
+
+    fun beginSync(beforeTraceId: TraceId,message: String): TraceStatus {
+        val nextId = beforeTraceId.createNextId()
+        val startTimeMs = System.currentTimeMillis()
+        logger.info("[{}] {}{}", nextId.id, addSpace(START_PREFIX, nextId.level), message)
+        return TraceStatus(nextId, startTimeMs, message)
     }
 
     fun end(status: TraceStatus) {

@@ -1,5 +1,6 @@
 package com.example.advanced.hellotrace
 
+import com.example.advanced.trace.hellotrace.HelloTraceV1
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
